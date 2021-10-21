@@ -181,7 +181,7 @@ beetles$female_treatment<- as.factor(beetles$female_treatment)
 summary(glht(mod1.3, mcp(female_treatment="Tukey")), test=adjusted("bonferroni"))
 
 
-# --------- MY MODELS -----------  
+# --------- PRACTICE MODELS -----------  
 
 # MODEL 2 including female and male treatment INCLUDING BLOCK
 # focusing on female response
@@ -312,7 +312,11 @@ beetles<- beetles %>%
 
 #---------- FINAL MODELS -------------
 
-#FEMALE DIRECT CARE
+#---- MODEL 4 - FEMALE DIRECT CARE -------
+
+#plot data
+hist(beetles$f_direct_care) #lots of zeros
+
 mod4.1<- glmmTMB(cbind(f_direct_care,ffreq_no_direct)~female_treatment+male_treatment+
                    female_treatment*male_treatment,data=beetles,family="binomial")
 
@@ -365,6 +369,9 @@ abline(v=sum(beetles$f_direct_care==0,na.rm=T),col="red",lwd=2)
 Anova(mod4.3)
 summary(mod4.3)
 
+#pairwise comparisons
+summary(glht(mod4.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
+#no effect of treatment on female direct care?
 
 #FEMALE INDIRECT CARE
 mod5.1<- glmmTMB(cbind(f_indirect_care,ffreq_no_indirect)~female_treatment+male_treatment+
