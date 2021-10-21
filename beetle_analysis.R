@@ -373,7 +373,22 @@ summary(mod4.3)
 summary(glht(mod4.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 #no effect of treatment on female direct care?
 
-#FEMALE INDIRECT CARE
+#plot results
+plot_mod4<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment,y=f_direct_care))+
+  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="black",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               size=3,position=position_dodge(0.8))+
+  ylab("Direct care (number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()
+  
+plot_mod4
+
+#------ MODEL 5 - FEMALE INDIRECT CARE ---------
+
 mod5.1<- glmmTMB(cbind(f_indirect_care,ffreq_no_indirect)~female_treatment+male_treatment+
                    female_treatment*male_treatment,data=beetles,family="binomial")
 
