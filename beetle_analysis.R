@@ -373,8 +373,8 @@ summary(mod4.3)
 summary(glht(mod4.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 #no effect of treatment on female direct care?
 
-#plot results
-plot_mod4<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment,y=f_direct_care))+
+#plot results (female treatment)
+plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment,y=f_direct_care))+
   geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
@@ -385,9 +385,24 @@ plot_mod4<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment
   xlab("Female Treatment")+
   theme_bw()
   
-plot_mod4
+plot_mod4_f
+
+#plot results (male presence)
+plot_mod4_m<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=male_treatment,y=f_direct_care))+
+  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="black",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               size=3,position=position_dodge(0.8))+
+  ylab("Direct care (number of scans)")+
+  xlab("Male presence")+
+  theme_bw()
+
+plot_mod4_m  #why does this not work?
 
 #------ MODEL 5 - FEMALE INDIRECT CARE ---------
+hist(beetles$f_indirect_care) #lots of zeros but otherwise normal distribution
 
 mod5.1<- glmmTMB(cbind(f_indirect_care,ffreq_no_indirect)~female_treatment+male_treatment+
                    female_treatment*male_treatment,data=beetles,family="binomial")
@@ -441,6 +456,38 @@ abline(v=sum(beetles$f_indirect_care==0,na.rm=T),col="red",lwd=2)
 #model outputs
 Anova(mod5.3)
 summary(mod5.3)
+
+#pairwise comparison
+summary(glht(mod5.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
+
+#plot results (female treatment)
+plot_mod5_f<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=female_treatment,y=f_indirect_care))+
+  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="black",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               size=3,position=position_dodge(0.8))+
+  ylab("Indirect care (number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()
+
+plot_mod5_f
+
+#plot results (male presence)
+plot_mod5_m<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=male_treatment,y=f_indirect_care))+
+  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="black",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               size=3,position=position_dodge(0.8))+
+  ylab("Indirect care (number of scans)")+
+  xlab("Male Presence")+
+  theme_bw()
+
+plot_mod5_m  #also doesnt work
+
 
 #MALE DIRECT CARE
 mod6.1<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+male_treatment+
