@@ -387,6 +387,12 @@ plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatme
   
 plot_mod4_f
 
+#format male treatment so the plot works
+str(beetles$female_treatment)
+str(beetles$male_treatment)
+beetles$male_treatment<- as.factor(beetles$male_treatment)
+str(beetles$male_treatment)
+
 #plot results (male presence)
 plot_mod4_m<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=male_treatment,y=f_direct_care))+
   geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
@@ -482,14 +488,16 @@ plot_mod5_m<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=male_treatme
                colour="black",width=0.2,position=position_dodge(0.8))+
   stat_summary(fun=mean,geom="point",shape=21,fill="grey",
                size=3,position=position_dodge(0.8))+
-  ylab("Indirect care (number of scans)")+
+  ylab("Female indirect care (number of scans)")+
   xlab("Male Presence")+
   theme_bw()
 
-plot_mod5_m  #also doesnt work
+plot_mod5_m  
 
 
-#MALE DIRECT CARE
+#----- MODEL 6 - MALE DIRECT CARE -----
+hist(beetles$m_direct_care)
+
 mod6.1<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+male_treatment+
                    female_treatment*male_treatment,data=beetles,family="binomial")
 
@@ -540,7 +548,7 @@ hist(nz,main="Number of zeros")
 abline(v=sum(beetles$m_direct_care==0,na.rm=T),col="red",lwd=2)
 #seems worse than no ziformula
 
-#MALE INDIRECT CARE
+#----- MODEL 7 - MALE INDIRECT CARE -----
 mod7.1<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+male_treatment+
                    female_treatment*male_treatment,data=beetles,family="binomial")
 
