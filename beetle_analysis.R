@@ -590,22 +590,22 @@ abline(v=sum(beetleMales$m_direct_care==0,na.rm=T),col="red",lwd=2)
 #(use simplest mode? so don't include)
 
 #----- MODEL 7 - MALE INDIRECT CARE -----
-mod7.1<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+male_treatment+
-                   female_treatment*male_treatment,data=beetles,family="binomial")
+mod7.1<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment,
+                 data=beetleMales,family="binomial")
 
 summary(mod7.1)
 
-plot(simulateResiduals(mod7.1))  #looks very overdispersed (but in an odd way)
+plot(simulateResiduals(mod7.1))  #overdispersed?
 
-mod7.2<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+male_treatment+
-                   female_treatment*male_treatment+(1|brood_id),data=beetles,family="binomial")
+mod7.2<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+
+                   (1|brood_id),data=beetleMales,family="binomial")
 
 plot(simulateResiduals(mod7.2))  #looks much better
 
 #chek how well it fits the data
 sim_max<- apply(simulate(mod7.2,nsim=1000),2,max)
-hist(sim_max,breaks=10)
-abline(v=max(beetles$m_indirect_care,na.rm=T),col="red",lwd=2)
+hist(sim_max,breaks=100)
+abline(v=max(beetleMales$m_indirect_care,na.rm=T),col="red",lwd=2)
 #this seems bad!!!!!
 
 #how well does model predict zeros
@@ -613,19 +613,19 @@ simy<- simulate(mod7.2,1000)
 nz<- c()
 for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
 hist(nz,main="Number of zeros")
-abline(v=sum(beetles$m_indirect_care==0,na.rm=T),col="red",lwd=2)
+abline(v=sum(beetleMales$m_indirect_care==0,na.rm=T),col="red",lwd=2)
+#seems good
 
 #try zi
-mod7.3<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+male_treatment+
-                   female_treatment*male_treatment+(1|brood_id),ziformula=~1,
-                 data=beetles,family="binomial")
+mod7.3<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+
+                   (1|brood_id),ziformula=~1,data=beetleMales,family="binomial")
 
 plot(simulateResiduals(mod7.3))
 
 #chek how well it fits the data
 sim_max<- apply(simulate(mod7.3,nsim=1000),2,max)
 hist(sim_max,breaks=10)
-abline(v=max(beetles$m_indirect_care,na.rm=T),col="red",lwd=2)
+abline(v=max(beetleMales$m_indirect_care,na.rm=T),col="red",lwd=2)
 #this seems better
 
 #how well does model predict zeros
@@ -633,6 +633,6 @@ simy<- simulate(mod7.3,1000)
 nz<- c()
 for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
 hist(nz,main="Number of zeros")
-abline(v=sum(beetles$m_indirect_care==0,na.rm=T),col="red",lwd=2)
+abline(v=sum(beetleMales$m_indirect_care==0,na.rm=T),col="red",lwd=2)
 
-#USE THIS MODEL BUT CHECK WITH PER/TOM  
+#NOTE: this model was not zero inflated but inlcuding ziformula allowed it to fit the data much better 
