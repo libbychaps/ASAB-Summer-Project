@@ -589,6 +589,33 @@ abline(v=sum(beetleMales$m_direct_care==0,na.rm=T),col="red",lwd=2)
 #how to choose whether (1|brood_id) should be included or not 
 #(use simplest mode? so don't include)
 
+# USE THIS MODEL?
+mod6.3<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment,
+                 ziformula=~1,data=beetleMales,family="binomial")
+
+#model outputs
+Anova(mod6.3)
+summary(mod6.3)
+
+#pairwise comparisons
+summary(glht(mod6.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
+#no effect of female treatment on male direct care?
+
+#plot results
+plot_mod6<- ggplot(subset(beetleMales, !is.na(m_direct_care)),aes(x=female_treatment,y=m_direct_care))+
+  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="black",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               size=3,position=position_dodge(0.8))+
+  ylab("Direct care (number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()
+
+plot_mod6     
+      
+
 #----- MODEL 7 - MALE INDIRECT CARE -----
 mod7.1<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment,
                  data=beetleMales,family="binomial")
@@ -635,4 +662,27 @@ for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
 hist(nz,main="Number of zeros")
 abline(v=sum(beetleMales$m_indirect_care==0,na.rm=T),col="red",lwd=2)
 
-#NOTE: this model was not zero inflated but inlcuding ziformula allowed it to fit the data much better 
+#NOTE: this model was not zero inflated but including ziformula ...
+#allowed it to fit the data much better 
+
+#model outputs
+Anova(mod7.3)
+summary(mod7.3)
+
+#pairwise comparisons
+summary(glht(mod7.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
+#no effect of female treatment on male indirect care?
+
+#plot results
+plot_mod7<- ggplot(subset(beetleMales, !is.na(m_indirect_care)),aes(x=female_treatment,y=m_indirect_care))+
+  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="black",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               size=3,position=position_dodge(0.8))+
+  ylab("Inirect care (number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()
+
+plot_mod7  
