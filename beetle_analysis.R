@@ -405,7 +405,7 @@ plot_mod4_m<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=male_treatment
   xlab("Male presence")+
   theme_bw()
 
-plot_mod4_m  #why does this not work?
+plot_mod4_m  
 
 #------ MODEL 5 - FEMALE INDIRECT CARE ---------
 hist(beetles$f_indirect_care) #lots of zeros but otherwise normal distribution
@@ -496,57 +496,98 @@ plot_mod5_m
 
 
 #----- MODEL 6 - MALE DIRECT CARE -----
-hist(beetles$m_direct_care)
 
-mod6.1<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+male_treatment+
-                   female_treatment*male_treatment,data=beetles,family="binomial")
+#came across errors but cant look at effect of male presence on male care (no males)
+#so -> create subset df for only when male was included
+beetleMales<- beetles[beetles$male_treatment == 1,]
+View(beetleMales)
+
+hist(beetleMales$m_direct_care)
+
+mod6.1<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment,
+                 data=beetleMales,family="binomial")
 
 summary(mod6.1)
 
 plot(simulateResiduals(mod6.1)) #does not seem overdispersed
 
 #try overdispersal model to see if it works better?
-mod6.2<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+male_treatment+
-                   female_treatment*male_treatment+(1|brood_id),data=beetles,family="binomial")
+mod6.2<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+
+                   (1|brood_id),data=beetleMales,family="binomial")
 
 plot(simulateResiduals(mod6.2)) #unsure which is better
 
-#how does it fit the data
-sim_max<- apply(simulate(mod6.2,nsim=1000),2,max)
-hist(sim_max,breaks=10)
-abline(v=max(beetles$m_direct_care,na.rm=T),col="red",lwd=2)
-#seems okay - line falls within predicted values (but only just)
+#how does it fit the data (mod6.1)
+sim_max<- apply(simulate(mod6.1,nsim=1000),2,max)
+hist(sim_max,breaks=100)
+abline(v=max(beetleMales$m_direct_care,na.rm=T),col="red",lwd=2)
+#?????
 
-#how well does model predict zeros
+#how well does it fit the data (mod6.2)
+sim_max<- apply(simulate(mod6.2,nsim=1000),2,max)
+hist(sim_max,breaks=100)
+abline(v=max(beetleMales$m_direct_care,na.rm=T),col="red",lwd=2)
+
+#how well does model predict zeros (mod6.1)
+simy<- simulate(mod6.1,1000)
+nz<- c()
+for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
+hist(nz,main="Number of zeros")
+abline(v=sum(beetleMales$m_direct_care==0,na.rm=T),col="red",lwd=2)
+#seems okay 
+
+#how well does model predict zeros (mod6.2)
 simy<- simulate(mod6.2,1000)
 nz<- c()
 for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
 hist(nz,main="Number of zeros")
-abline(v=sum(beetles$m_direct_care==0,na.rm=T),col="red",lwd=2)
-#seems okay 
+abline(v=sum(beetleMales$m_direct_care==0,na.rm=T),col="red",lwd=2)
+#also seems okay
 
-summary(mod6.2) #why not giving normal results?
+summary(mod6.1)
+summary(mod6.2) 
 
-#try including zero inflation to see if it does better
-mod6.3<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+male_treatment+
-                   female_treatment*male_treatment+(1|brood_id),ziformula=~1,
-                 data=beetles,family="binomial")
+#try including zero inflation to see if it does better (no overdispersal)
+mod6.3<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment,ziformula=~1,
+                 data=beetleMales,family="binomial")
 
 plot(simulateResiduals(mod6.3)) 
 
 #how does it fit the data
 sim_max<- apply(simulate(mod6.3,nsim=1000),2,max)
-hist(sim_max,breaks=10)
-abline(v=max(beetles$m_direct_care,na.rm=T),col="red",lwd=2)
-#seems okay - line falls within predicted values (but only just)
+hist(sim_max,breaks=100)
+abline(v=max(beetleMales$m_direct_care,na.rm=T),col="red",lwd=2)
 
 #how well does model predict zeros
 simy<- simulate(mod6.3,1000)
 nz<- c()
 for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
 hist(nz,main="Number of zeros")
-abline(v=sum(beetles$m_direct_care==0,na.rm=T),col="red",lwd=2)
-#seems worse than no ziformula
+abline(v=sum(beetleMales$m_direct_care==0,na.rm=T),col="red",lwd=2)
+#better
+
+#try including zero inflation to see if it does better (including overdispersal)
+mod6.4<- glmmTMB(cbind(m_direct_care,mfreq_no_direct)~female_treatment+
+                   (1|brood_id),ziformula=~1,
+                 data=beetleMales,family="binomial")
+
+plot(simulateResiduals(mod6.4)) 
+
+#how does it fit the data
+sim_max<- apply(simulate(mod6.4,nsim=1000),2,max)
+hist(sim_max,breaks=100)
+abline(v=max(beetleMales$m_direct_care,na.rm=T),col="red",lwd=2)
+
+#how well does model predict zeros
+simy<- simulate(mod6.4,1000)
+nz<- c()
+for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
+hist(nz,main="Number of zeros")
+abline(v=sum(beetleMales$m_direct_care==0,na.rm=T),col="red",lwd=2)
+#better
+
+#how to choose whether (1|brood_id) should be included or not 
+#(use simplest mode? so don't include)
 
 #----- MODEL 7 - MALE INDIRECT CARE -----
 mod7.1<- glmmTMB(cbind(m_indirect_care,mfreq_no_indirect)~female_treatment+male_treatment+
