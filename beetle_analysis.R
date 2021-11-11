@@ -752,7 +752,7 @@ mod10.1<- glm(disp_weight_average~female_treatment+male_treatment+
 summary(mod10.1)
 
 #check overdispersal
-plot(simulateResiduals(mod9.1)) #not overdispersed
+plot(simulateResiduals(mod10.1)) #Q-Q plot looks BAD
 
 #check how well it fits the data
 sim_max<- apply(simulate(mod10.1,nsim=1000),2,max)
