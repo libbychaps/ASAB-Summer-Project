@@ -686,3 +686,51 @@ plot_mod7<- ggplot(subset(beetleMales, !is.na(m_indirect_care)),aes(x=female_tre
   theme_bw()
 
 plot_mod7  
+
+
+# ----- EFFECT ON LARVAL PERFORMANCE -----
+
+# DISPERSAL LARVAE NUMBER
+hist(beetles$disp_larvae_no) #poisson distributed
+
+#initial model
+mod8.1<- glm(disp_larvae_no~female_treatment+male_treatment+
+             female_treatment*male_treatment,data=beetles,family="poisson")
+
+summary(mod8.1)
+
+#check overdispersal
+plot(simulateResiduals(mod8.1)) #not overdispersed
+
+#check how well it fits the data
+sim_max<- apply(simulate(mod8.1,nsim=1000),2,max)
+hist(sim_max,breaks=10)
+abline(v=max(beetles$disp_larvae_no,na.rm=T),col="red",lwd=2)
+#within predicted values
+
+Anova(mod8.1)
+summary(mod8.1)
+
+# DISPERSAL LARVAE WEIGHT (BROOD)
+hist(beetles$disp_larvae_weight) #poisson distributed
+
+#initial model
+mod9.1<- glm(disp_larvae_weight~female_treatment+male_treatment+
+               female_treatment*male_treatment,data=beetles,family="poisson")
+
+summary(mod8.1)
+
+#check overdispersal
+plot(simulateResiduals(mod8.1)) #not overdispersed
+
+#check how well it fits the data
+sim_max<- apply(simulate(mod8.1,nsim=1000),2,max)
+hist(sim_max,breaks=10)
+abline(v=max(beetles$disp_larvae_no,na.rm=T),col="red",lwd=2)
+#within predicted values
+
+Anova(mod8.1)
+summary(mod8.1)
+
+
+# dispersal larvae weight (average individual)
