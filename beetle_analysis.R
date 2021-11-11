@@ -712,25 +712,50 @@ Anova(mod8.1)
 summary(mod8.1)
 
 # DISPERSAL LARVAE WEIGHT (BROOD)
-hist(beetles$disp_larvae_weight) #poisson distributed
+hist(beetles$disp_larvae_weight,breaks=10) 
 
 #initial model
 mod9.1<- glm(disp_larvae_weight~female_treatment+male_treatment+
                female_treatment*male_treatment,data=beetles,family="poisson")
 
-summary(mod8.1)
+summary(mod9.1)
 
 #check overdispersal
-plot(simulateResiduals(mod8.1)) #not overdispersed
+plot(simulateResiduals(mod9.1)) #not overdispersed
 
 #check how well it fits the data
-sim_max<- apply(simulate(mod8.1,nsim=1000),2,max)
+sim_max<- apply(simulate(mod9.1,nsim=1000),2,max)
 hist(sim_max,breaks=10)
-abline(v=max(beetles$disp_larvae_no,na.rm=T),col="red",lwd=2)
-#within predicted values
+abline(v=max(beetles$disp_larvae_weight,na.rm=T),col="red",lwd=2)
+#outside predicted values
 
-Anova(mod8.1)
-summary(mod8.1)
+#----- how do i fix this? -----
 
 
-# dispersal larvae weight (average individual)
+# DISPERSAL LARVAE WEIGHT (AVERAGE INDIVIDUAL)
+#create column for average larvae weight
+beetles<- beetles %>%
+  mutate(disp_weight_average = disp_larvae_weight/disp_larvae_no)
+View(beetles$disp_weight_average)
+
+#replace Na value with 0
+beetles$disp_weight_average[is.na(beetles$disp_weight_average)] <- 0
+View(beetles$disp_weight_average)
+
+hist(beetles$disp_weight_average,breaks=50) #normally distributed?
+shapiro.test(beetles$disp_weight_average) #significantly different from normal
+#poisson distribution
+
+mod10.1<- glm(disp_weight_average~female_treatment+male_treatment+
+               female_treatment*male_treatment,data=beetles,family="poisson")
+
+summary(mod10.1)
+
+#check overdispersal
+plot(simulateResiduals(mod9.1)) #not overdispersed
+
+#check how well it fits the data
+sim_max<- apply(simulate(mod10.1,nsim=1000),2,max)
+hist(sim_max,breaks=10)
+abline(v=max(beetles$disp_weight_average,na.rm=T),col="red",lwd=2)
+#where is the line?
