@@ -347,7 +347,7 @@ abline(v=sum(beetles$f_direct_care==0,na.rm=T),col="red",lwd=2)
 #include zero inflation model
 mod4.3<- glmmTMB(cbind(f_direct_care,ffreq_no_direct)~female_treatment+male_treatment+
                    female_treatment*male_treatment+(1|brood_id),
-                 ziformula=~1,data=beetles,family=binomial)
+                  ziformula=~1,data=beetles,family=binomial)
 
 #ceck overdispersion
 plot(simulateResiduals(mod4.3))
