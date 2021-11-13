@@ -383,7 +383,9 @@ plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatme
                size=3,position=position_dodge(0.8))+
   ylab("Direct care (number of scans)")+
   xlab("Female Treatment")+
-  theme_bw()
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))
   
 plot_mod4_f
 
@@ -712,7 +714,7 @@ Anova(mod8.1)
 summary(mod8.1)
 
 # DISPERSAL LARVAE WEIGHT (BROOD)
-hist(beetles$disp_larvae_weight,breaks=10) 
+hist(beetles$disp_larvae_weight,breaks=50)
 
 #initial model
 mod9.1<- glm(disp_larvae_weight~female_treatment+male_treatment+
