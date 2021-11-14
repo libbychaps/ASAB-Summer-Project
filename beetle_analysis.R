@@ -11,6 +11,7 @@ library(glmmTMB)     #to run zero-inflated GLMMs
 library(DHARMa)      #to check model residuals
 library(ggplot2)     #for graphing results
 library(multcomp)    #to run post-hoc tests (pairwise comparisons)
+library(RColorBrewer)
 
 #import data
 beetles <- read_csv("~/University/ASAB beetle project/beetle_data.csv")
@@ -375,19 +376,22 @@ summary(glht(mod4.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 
 #plot results (female treatment)
 plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment,y=f_direct_care))+
-  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
-               colour="black",width=0.2,position=position_dodge(0.8))+
-  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
                size=3,position=position_dodge(0.8))+
-  ylab("Direct care (number of scans)")+
-  xlab("Female Treatment")+
+  ylab("Direct care \n(number of scans)")+
+  xlab("Female treatment")+
   theme_bw()+
   theme(axis.title.x = element_text(size=20),
-        axis.title.y = element_text(size=20))
-  
-plot_mod4_f
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+
+plot_mod4_f 
 
 #format male treatment so the plot works
 str(beetles$female_treatment)
@@ -397,15 +401,20 @@ str(beetles$male_treatment)
 
 #plot results (male presence)
 plot_mod4_m<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=male_treatment,y=f_direct_care))+
-  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
-               colour="black",width=0.2,position=position_dodge(0.8))+
-  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
                size=3,position=position_dodge(0.8))+
-  ylab("Direct care (number of scans)")+
-  xlab("Male presence")+
-  theme_bw()
+  ylab("Direct care \n(number of scans)")+
+  xlab("Male")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("0"="Absent","1"="Present"))
 
 plot_mod4_m  
 
@@ -470,32 +479,41 @@ summary(glht(mod5.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 
 #plot results (female treatment)
 plot_mod5_f<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=female_treatment,y=f_indirect_care))+
-  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
-               colour="black",width=0.2,position=position_dodge(0.8))+
-  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
                size=3,position=position_dodge(0.8))+
-  ylab("Indirect care (number of scans)")+
+  ylab("Indirect care \n(number of scans)")+
   xlab("Female Treatment")+
-  theme_bw()
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
 
 plot_mod5_f
 
 #plot results (male presence)
 plot_mod5_m<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=male_treatment,y=f_indirect_care))+
-  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
-               colour="black",width=0.2,position=position_dodge(0.8))+
-  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
                size=3,position=position_dodge(0.8))+
-  ylab("Female indirect care (number of scans)")+
-  xlab("Male Presence")+
-  theme_bw()
+  ylab("Indirect care \n(number of scans)")+
+  xlab("Male")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("0"="Absent","1"="Present")) 
 
-plot_mod5_m  
-
+plot_mod5_m
 
 #----- MODEL 6 - MALE DIRECT CARE -----
 
@@ -605,15 +623,20 @@ summary(glht(mod6.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 
 #plot results
 plot_mod6<- ggplot(subset(beetleMales, !is.na(m_direct_care)),aes(x=female_treatment,y=m_direct_care))+
-  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
-               colour="black",width=0.2,position=position_dodge(0.8))+
-  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
                size=3,position=position_dodge(0.8))+
-  ylab("Direct care (number of scans)")+
+  ylab("Direct care \n(number of scans)")+
   xlab("Female Treatment")+
-  theme_bw()
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
 
 plot_mod6     
       
@@ -677,15 +700,20 @@ summary(glht(mod7.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 
 #plot results
 plot_mod7<- ggplot(subset(beetleMales, !is.na(m_indirect_care)),aes(x=female_treatment,y=m_indirect_care))+
-  geom_dotplot(binaxis="y",stackdir="center",alpha=0.6,dotsize=0.5,
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
                position=position_dodge(0.8))+
   stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
-               colour="black",width=0.2,position=position_dodge(0.8))+
-  stat_summary(fun=mean,geom="point",shape=21,fill="grey",
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
                size=3,position=position_dodge(0.8))+
-  ylab("Inirect care (number of scans)")+
+  ylab("Inirect care \n(number of scans)")+
   xlab("Female Treatment")+
-  theme_bw()
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
 
 plot_mod7  
 
@@ -761,3 +789,134 @@ sim_max<- apply(simulate(mod10.1,nsim=1000),2,max)
 hist(sim_max,breaks=10)
 abline(v=max(beetles$disp_weight_average,na.rm=T),col="red",lwd=2)
 #where is the line?
+
+
+
+#----- COLOUR PALETTES -----
+display.brewer.pal(n = 8, name = 'Set2')
+brewer.pal(n = 8, name = "Set2")
+display.brewer.pal(n=10,name="Set3")
+brewer.pal(n=10,name="Set3")
+display.brewer.pal(n=8,name="Greys")
+brewer.pal(n=8,name="Greys")
+display.brewer.pal(n=8,name="Set1")
+brewer.pal(n=8,name="Set1")
+display.brewer.pal(n=8,name="Accent")
+brewer.pal(n=8,name="Accent")
+
+
+
+#----- ALL PLOTS -----
+#female direct (female)
+plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment,y=f_direct_care))+
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
+               size=3,position=position_dodge(0.8))+
+  ylab("Direct care \n(number of scans)")+
+  xlab("Female treatment")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+
+plot_mod4_f 
+
+#female direct (male)
+plot_mod4_m<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=male_treatment,y=f_direct_care))+
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
+               size=3,position=position_dodge(0.8))+
+  ylab("Direct care \n(number of scans)")+
+  xlab("Male")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("0"="Absent","1"="Present"))
+
+plot_mod4_m  
+
+#female indirect (female)
+plot_mod5_f<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=female_treatment,y=f_indirect_care))+
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
+               size=3,position=position_dodge(0.8))+
+  ylab("Indirect care \n(number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+
+plot_mod5_f
+
+#female indirect (male)
+plot_mod5_m<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=male_treatment,y=f_indirect_care))+
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
+               size=3,position=position_dodge(0.8))+
+  ylab("Indirect care \n(number of scans)")+
+  xlab("Male")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("0"="Absent","1"="Present")) 
+
+plot_mod5_m
+
+#male direct
+plot_mod6<- ggplot(subset(beetleMales, !is.na(m_direct_care)),aes(x=female_treatment,y=m_direct_care))+
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
+               size=3,position=position_dodge(0.8))+
+  ylab("Direct care \n(number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+
+plot_mod6     
+
+#male indirect
+plot_mod7<- ggplot(subset(beetleMales, !is.na(m_indirect_care)),aes(x=female_treatment,y=m_indirect_care))+
+  geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
+               position=position_dodge(0.8))+
+  stat_summary(fun.data=mean_se,geom="errorbar",fun.args=list(mult=1),
+               colour="#386CB0",width=0.2,position=position_dodge(0.8))+
+  stat_summary(fun=mean,geom="point",shape=21,colour="#386CB0",fill="#80B1D3",
+               size=3,position=position_dodge(0.8))+
+  ylab("Inirect care \n(number of scans)")+
+  xlab("Female Treatment")+
+  theme_bw()+
+  theme(axis.title.x = element_text(size=20),
+        axis.title.y = element_text(size=20))+
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size=18))+
+  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+
+plot_mod7  
