@@ -374,6 +374,10 @@ summary(mod4.3)
 summary(glht(mod4.3,mcp(female_treatment="Tukey")),test=adjusted("bonferroni"))
 #no effect of treatment on female direct care?
 
+#check confidence intervals
+confint(mod4.3)
+#------ COMPARE THESE WITH TOM'S CONFIDENCE INTERVALS -------
+
 #plot results (female treatment)
 plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatment,y=f_direct_care))+
   geom_dotplot(binaxis="y",stackdir="center",colour="#7FC97F",fill="#7FC97F",alpha=0.6,dotsize=0.5,
@@ -389,7 +393,7 @@ plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatme
         axis.title.y = element_text(size=20))+
   theme(axis.text.x = element_text(size=18),
         axis.text.y = element_text(size=18))+
-  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+  scale_x_discrete(labels=c("0"="Control","1"="Handicapped"))
 
 plot_mod4_f 
 
@@ -492,7 +496,8 @@ plot_mod5_f<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=female_treat
         axis.title.y = element_text(size=20))+
   theme(axis.text.x = element_text(size=18),
         axis.text.y = element_text(size=18))+
-  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+  scale_x_discrete(labels=c("0"="Control","1"="Handicapped"))
+
 
 plot_mod5_f
 
@@ -741,55 +746,122 @@ abline(v=max(beetles$disp_larvae_no,na.rm=T),col="red",lwd=2)
 Anova(mod8.1)
 summary(mod8.1)
 
-# DISPERSAL LARVAE WEIGHT (BROOD)
-hist(beetles$disp_larvae_weight,breaks=50)
+#DISP LARVAE WEIGHT
+#subset data to include only broods with larvae alive
+beetlesDisp<- beetles[beetles$disp_larvae_no > 0,] #remove instances with no larvae survived
+View(beetlesDisp)
 
-#initial model
-mod9.1<- glm(disp_larvae_weight~female_treatment+male_treatment+
-               female_treatment*male_treatment,data=beetles,family="poisson")
+hist(beetlesDisp$disp_larvae_weight)
+shapiro.test(beetlesDisp$disp_larvae_weight) #normal distribution
+
+mod9.1<- lm(disp_larvae_weight~female_treatment+male_treatment+
+              female_treatment*male_treatment,data=beetlesDisp)
 
 summary(mod9.1)
 
-#check overdispersal
-plot(simulateResiduals(mod9.1)) #not overdispersed
+plot(simulateResiduals(mod9.1))
 
 #check how well it fits the data
 sim_max<- apply(simulate(mod9.1,nsim=1000),2,max)
 hist(sim_max,breaks=10)
-abline(v=max(beetles$disp_larvae_weight,na.rm=T),col="red",lwd=2)
-#outside predicted values
+abline(v=max(beetlesDisp$disp_larvae_weight,na.rm=T),col="red",lwd=2)
+#nice
 
-#----- how do i fix this? -----
+Anova(mod9.1) #something is significant
 
-
-# DISPERSAL LARVAE WEIGHT (AVERAGE INDIVIDUAL)
-#create column for average larvae weight
+#----- TOTAL CARE -----
+#create column for total care (only female)
 beetles<- beetles %>%
-  mutate(disp_weight_average = disp_larvae_weight/disp_larvae_no)
-View(beetles$disp_weight_average)
+  mutate(total_care_f =  f_freq_g + f_freq_m + f_freq_c + f_freq_f + f_freq_l)
 
-#replace Na value with 0
-beetles$disp_weight_average[is.na(beetles$disp_weight_average)] <- 0
-View(beetles$disp_weight_average)
+beetles<- beetles %>%
+  mutate(total_nocare_f = f_freq_s + f_freq_n + f_freq_a)
 
-hist(beetles$disp_weight_average,breaks=50) #normally distributed?
-shapiro.test(beetles$disp_weight_average) #significantly different from normal
-#poisson distribution
+#create column for total care (female and male)
+beetleMales<- beetleMales %>%
+  mutate(total_care = f_freq_g + f_freq_m + f_freq_c + f_freq_f + f_freq_l+
+                      m_freq_g + m_freq_m + m_freq_c + m_freq_f + m_freq_l)
 
-mod10.1<- glm(disp_weight_average~female_treatment+male_treatment+
-               female_treatment*male_treatment,data=beetles,family="poisson")
+beetleMales<- beetleMales %>%
+  mutate(total_nocare = f_freq_s + f_freq_n + f_freq_a+
+                        m_freq_s + m_freq_n + m_freq_a)
 
-summary(mod10.1)
+hist(beetleMales$total_care) #norml distribution
+shapiro.test(beetleMales$total_care) #normal
 
-#check overdispersal
-plot(simulateResiduals(mod10.1)) #Q-Q plot looks BAD
+#males
+mod11.1<- glmmTMB(cbind(total_care,total_nocare)~female_treatment,
+                 data=beetleMales,family="binomial")
 
-#check how well it fits the data
-sim_max<- apply(simulate(mod10.1,nsim=1000),2,max)
+summary(mod11.1)
+
+plot(simulateResiduals(mod11.1)) 
+
+mod11.2<- glmmTMB(cbind(total_care,total_nocare)~female_treatment+(1|brood_id),
+                  data=beetleMales,family="binomial")
+
+summary(mod11.2)
+
+plot(simulateResiduals(mod11.2)) #better
+
+sim_max<- apply(simulate(mod11.2,nsim=1000),2,max)
+hist(sim_max,breaks=100)
+abline(v=max(beetleMales$total_care,na.rm=T),col="red",lwd=2)
+#this seems okay
+
+#model not zero inflated so go with this
+
+summary(mod11.2)
+
+#female
+hist(beetles$total_care_f) #not normal
+shapiro.test(beetles$total_care_f) #not normal
+
+mod12.1<- glmmTMB(cbind(total_care_f,total_nocare_f)~female_treatment+male_treatment+
+                    female_treatment*male_treatment,data=beetles,family="binomial")
+
+summary(mod12.1)
+
+plot(simulateResiduals(mod12.1)) #very overdispersed
+
+mod12.2<- glmmTMB(cbind(total_care_f,total_nocare_f)~female_treatment+male_treatment+
+                    female_treatment*male_treatment+(1|brood_id),
+                  data=beetles,family="binomial")
+
+plot(simulateResiduals(mod12.2)) #better
+
+#chek how well it fits the data
+sim_max<- apply(simulate(mod12.2,nsim=1000),2,max)
 hist(sim_max,breaks=10)
-abline(v=max(beetles$disp_weight_average,na.rm=T),col="red",lwd=2)
-#where is the line?
+abline(v=max(beetles$total_care_f,na.rm=T),col="red",lwd=2)
+#this seems bad
 
+#how well does model predict zeros
+simy<- simulate(mod12.2,1000)
+nz<- c()
+for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
+hist(nz,main="Number of zeros")
+abline(v=sum(beetles$total_care_f==0,na.rm=T),col="red",lwd=2)
+
+#include zi
+mod12.3<- glmmTMB(cbind(total_care_f,total_nocare_f)~female_treatment+male_treatment+
+                    female_treatment*male_treatment+(1|brood_id),ziformula=~1,
+                  data=beetles,family="binomial")
+
+plot(simulateResiduals(mod12.3)) #ok
+
+#chek how well it fits the data
+sim_max<- apply(simulate(mod12.3,nsim=1000),2,max)
+hist(sim_max,breaks=10)
+abline(v=max(beetles$total_care_f,na.rm=T),col="red",lwd=2)
+#this seems bad
+
+#how well does model predict zeros
+simy<- simulate(mod12.3,1000)
+nz<- c()
+for(i in seq(1,length(simy),1)){nz[i]<- colSums(simy[,i]==0)[1]}
+hist(nz,main="Number of zeros")
+#BAD
 
 
 #----- COLOUR PALETTES -----
@@ -822,7 +894,7 @@ plot_mod4_f<- ggplot(subset(beetles, !is.na(f_direct_care)),aes(x=female_treatme
         axis.title.y = element_text(size=20))+
   theme(axis.text.x = element_text(size=18),
         axis.text.y = element_text(size=18))+
-  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+  scale_x_discrete(labels=c("0"="Control","1"="Handicapped"))
 
 plot_mod4_f 
 
@@ -860,7 +932,7 @@ plot_mod5_f<- ggplot(subset(beetles, !is.na(f_indirect_care)),aes(x=female_treat
         axis.title.y = element_text(size=20))+
   theme(axis.text.x = element_text(size=18),
         axis.text.y = element_text(size=18))+
-  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+  scale_x_discrete(labels=c("0"="Control","1"="Handicapped"))
 
 plot_mod5_f
 
@@ -898,7 +970,7 @@ plot_mod6<- ggplot(subset(beetleMales, !is.na(m_direct_care)),aes(x=female_treat
         axis.title.y = element_text(size=20))+
   theme(axis.text.x = element_text(size=18),
         axis.text.y = element_text(size=18))+
-  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+  scale_x_discrete(labels=c("0"="Control","1"="Handicapped"))
 
 plot_mod6     
 
@@ -917,6 +989,6 @@ plot_mod7<- ggplot(subset(beetleMales, !is.na(m_indirect_care)),aes(x=female_tre
         axis.title.y = element_text(size=20))+
   theme(axis.text.x = element_text(size=18),
         axis.text.y = element_text(size=18))+
-  scale_x_discrete(labels=c("1"="Control","2"="Handicapped"))
+  scale_x_discrete(labels=c("0"="Control","1"="Handicapped"))
 
 plot_mod7  
